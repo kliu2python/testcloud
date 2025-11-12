@@ -1,0 +1,13 @@
+global:
+  scrape_interval: 5s
+
+scrape_configs:
+  - job_name: "backend"
+    static_configs:
+      - targets: ["backend:8000"]
+
+  - job_name: "runner_agents"
+    static_configs:
+      - targets: ["runner-node-1:9000"]
+        # 后续有更多 runner 就在这里加：
+        # - targets: ["runner-node-1:9000", "runner-node-2:9000"]

@@ -1,0 +1,68 @@
+version: "3.9"
+
+services:
+  backend:
+    build: ./backend
+    container_name: testcloud-backend
+    env_file: ./backend/.env
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./backend:/app
+    depends_on:
+      - redis
+      - postgres
+
+  frontend:
+    build: ./frontend
+    container_name: testcloud-frontend
+    ports:
+      - "5173:5173"
+    depends_on:
+      - backend
+
+  redis:
+    image: redis:7
+    container_name: testcloud-redis
+    ports:
+      - "6379:6379"
+
+  postgres:
+    image: postgres:16
+    container_name: testcloud-postgres
+    environment:
+      POSTGRES_USER: testcloud
+      POSTGRES_PASSWORD: testcloud
+      POSTGRES_DB: testcloud
+    ports:
+      - "5432:5432"
+
+  runner-node:
+    build: ./runner_agent
+    container_name: testcloud-runner
+    environment:
+      - RUNNER_NAME=runner-node-1
+      - BACKEND_URL=http://backend:8000
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+    depends_on:
+      - backend
+
+  prometheus:
+    image: prom/prometheus:latest
+    container_name: testcloud-prometheus
+    volumes:
+      - ./monitoring/prometheus.yml:/etc/prometheus/prometheus.yml
+    ports:
+      - "9090:9090"
+    depends_on:
+      - backend
+      - runner-node-1
+
+  grafana:
+    image: grafana/grafana:latest
+    container_name: testcloud-grafana
+    ports:
+      - "3000:3000"
+    depends_on:
+      - prometheus
