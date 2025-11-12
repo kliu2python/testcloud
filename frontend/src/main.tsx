@@ -7,6 +7,7 @@ import Devices from './pages/Devices'
 import Reports from './pages/Reports'
 import Files from './pages/Files'
 
+import 'tailwindcss/index.css'
 import './index.css'
 
 function App() {
