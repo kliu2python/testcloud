@@ -10,3 +10,4 @@ docker
 openai
 pandas
 prometheus-client
+python-multipart

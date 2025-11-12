@@ -1,6 +1,7 @@
 from fastapi import FastAPI, Response
 from fastapi.middleware.cors import CORSMiddleware
-from prometheus_client import Counter, Gauge, Histogram, generate_latest
+from prometheus_client import generate_latest
+from services.metrics import test_jobs_total, test_jobs_running
 
 from routers import dashboard, devices, tests, files, ai_analysis
 
@@ -20,20 +21,10 @@ app.include_router(tests.router, prefix="/api/tests", tags=["tests"])
 app.include_router(files.router, prefix="/api/files", tags=["files"])
 app.include_router(ai_analysis.router, prefix="/api/ai", tags=["ai"])
 
-# ===== Prometheus Metrics 定义 =====
-test_jobs_total = Counter(
-    "test_jobs_total",
-    "Total number of test jobs started",
-    ["status", "image"]
-)
-
-# 你可以在 tests router 里调用 test_jobs_total.labels(...).inc()
-
 @app.get("/")
 def root():
     return {"status": "ok", "service": "testcloud-backend"}
 
 @app.get("/metrics")
 def metrics():
-    data = generate_latest()
-    return Response(content=data, media_type="text/plain")
+    return Response(generate_latest(), media_type="text/plain")
